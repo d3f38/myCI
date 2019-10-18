@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+     
+</head>
+<body>
+        <style>
+            body {
+                font-family: monospace;
+            }
+        </style>
+        <div class="build__run-build">
+            <label for="hashCommit">Хэш коммита</label>
+            <input type="text" id="hashCommit" class="build__hashCommit" required/>
+            <label for="buildCommand">Сборочная команда</label>
+            <input type="text" id="buildCommand" class="build__buildCommand" required/>
+            <button class="build__button build__button_start">
+                Запустить сборку
+            </button>
+        </div>
+        
+        <table class="build__table">
+            <tbody>
+                <tr>
+                    <th>Номер сборки</th>
+                    <th>Статус</th>
+                </tr>
+
+            </tbody>
+        </table>
+        <script>
+            window.addEventListener('DOMContentLoaded', () => {
+                fetch('/get_list_results').then(data => {
+                    return data.text()
+                }).then(data => {
+                    document.querySelector('table tbody tr:last-child').insertAdjacentHTML('afterend', data);
+                });  
+
+                const submitTask = function (hashCommit, buildCommand) {
+                    fetch('http://localhost:5001/build', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            buildId: Math.round(Math.random()*1000000),
+                            repository: './../myArcanumWithReact',
+                            hashCommit: hashCommit,
+                            buildCommand: buildCommand
+                        })
+                        
+                    }).then(data => {
+                        
+                        return data.text()
+                    }).then(data => {
+                        document.querySelector('table tbody tr:last-child').outerHTML = data;
+                    });        
+                }   
+                document.querySelector('.build__button_start').addEventListener('click', () => {
+                    const isLoading = document.querySelector('table tbody tr:last-child').textContent !== 'Идет сборка..';
+                    
+                    if (isLoading) {
+                        const hashCommit = document.querySelector('#hashCommit').value;
+                        const buildCommand = document.querySelector('#buildCommand').value;
+
+                        if (hashCommit && buildCommand) {
+                            document.querySelector('table tbody').insertAdjacentHTML('beforeend', '<tr><td>Идет сборка..</td></tr>')
+                            submitTask(hashCommit, buildCommand);
+                        } else {
+                            alert('Введите данные для сборки')
+                        }
+                    }
+                });
+            });
+    
+        </script>
+</body>
+</html>
+
+
+
+            
+
