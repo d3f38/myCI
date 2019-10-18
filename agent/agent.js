@@ -30,7 +30,7 @@ app.post('/build', (req, res) => {
     exec(`git checkout ${req.body.hashCommit}`, {cwd: `${configServer.repository}`}, (err, out) => {
         timeStart = (new Date).toLocaleString();
         if (err) {
-            resExec.end('build error');
+            res.end('build error');
         }
         else {
             const buildCommand = req.body.buildCommand.split(' ').shift();
